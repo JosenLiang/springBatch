@@ -1,0 +1,154 @@
+import groovy.sql.Sql
+import org.apache.commons.dbcp.BasicDataSource
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'org.springframework.batch.core.launch.support.CommandLineJobRunner'
+
+run {
+    args 'jobs/helloWorldJob.xml', 'helloWorldJob'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'mysql:mysql-connector-java:5.1.3'
+        classpath 'commons-dbcp:commons-dbcp:1.2.2'
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile(
+            'org.springframework:spring-context:3.0.5.RELEASE',
+            'org.springframework:spring-aop:3.0.5.RELEASE',
+            'org.springframework:spring-jdbc:3.0.5.RELEASE',
+            'org.springframework.batch:spring-batch-core:2.1.7.RELEASE',
+            'org.springframework.batch:spring-batch-infrastructure:2.1.7.RELEASE',
+            'org.springframework:spring-web:3.0.5.RELEASE',
+            'commons-dbcp:commons-dbcp:1.2.2',
+            'org.slf4j:slf4j-log4j12:1.5.8',
+            'log4j:log4j:1.2.14',
+            'mysql:mysql-connector-java:5.1.3',
+            'commons-io:commons-io:1.4',
+            'org.aspectj:aspectjrt:1.6.6',
+            'org.aspectj:aspectjweaver:1.6.6',
+            'com.google.guava:guava:18.0',
+            'org.springframework:spring-context-support:3.0.5.RELEASE',
+            'org.quartz-scheduler:quartz:1.8.3',
+            'commons-collections:commons-collections:3.2.1',
+            'org.springframework.batch:spring-batch-admin-manager:1.2.0.RELEASE',
+            'org.hibernate:hibernate-core:3.3.0.SP1',
+            'org.hibernate:hibernate-entitymanager:3.3.2.GA',
+            'org.hibernate:hibernate-annotations:3.4.0.GA',
+            'org.springframework:spring-orm:3.0.5.RELEASE'
+    )
+    testCompile(
+            'junit:junit:4.11',
+            'org.easymock:easymock:3.3',
+            'org.springframework:spring-test:3.0.5.RELEASE',
+            'org.springframework.batch:spring-batch-test:2.1.7.RELEASE'
+    )
+}
+
+task createDB {
+    doLast {
+        def dataSource = new BasicDataSource()
+        dataSource.with {
+            driverClassName = 'com.mysql.jdbc.Driver'
+            password = 'root'
+            username = 'root'
+            url = 'jdbc:mysql://localhost:3306'
+        }
+        def sql = new Sql(dataSource)
+        try {
+            sql.execute 'DROP DATABASE IF EXISTS spring_batch_demo'
+        } catch (ex) {
+            println ex.message
+        }
+        sql.execute 'CREATE DATABASE spring_batch_demo'
+        sql.execute 'USE spring_batch_demo'
+
+        readSqlFile('schema-spring-batch.txt').each { String sqlStatement ->
+            sql.execute sqlStatement
+        }
+    }
+}
+
+task copyFile {
+    doLast {
+        def sourceDir = new File('files')
+        def destinationDir = deleteDirectoryIfExists 'build/install/SpringBatch/files'
+
+        if (sourceDir.exists()) {
+            sourceDir.eachFileRecurse { File file ->
+                if (!file.name.startsWith('.')) {
+                    createSameFileUnderTargetDir file, sourceDir, destinationDir
+                }
+            }
+        }
+    }
+}
+
+task startupClass {
+    doLast {
+        project.mainClassName = project.className
+    }
+}
+
+def readSqlFile(String filePath) {
+    List<String> sqlStatements = []
+    String currentSqlStatement = ''
+
+    new File(filePath).eachLine { String line ->
+        if (!line.isEmpty() && !line.trim().startsWith('--')) {
+            if (line.contains(';')) {
+                currentSqlStatement += line.substring(0, line.lastIndexOf(';') + 1)
+                sqlStatements << currentSqlStatement
+                currentSqlStatement = line.substring(line.lastIndexOf(';') + 1)
+            } else {
+                currentSqlStatement += line
+            }
+        }
+    }
+
+    if (!currentSqlStatement.isEmpty()) {
+        sqlStatements << currentSqlStatement
+    }
+
+    sqlStatements
+}
+
+def deleteDirectoryIfExists(String path) {
+    def dir = new File(path)
+    if (dir.exists()) {
+        dir.deleteDir()
+    }
+    dir
+}
+
+def createSameFileUnderTargetDir(File file, File sourceDir, File targetDir) {
+    def targetFile = getTargetFile file, sourceDir.absolutePath, targetDir.absolutePath
+    if (file.directory) {
+        if (!targetFile.exists()) {
+            targetFile.mkdirs()
+        }
+    } else {
+        if (!targetFile.exists()) {
+            targetFile.text = file.text
+        }
+    }
+}
+
+def getTargetFile(File file, String originalRoot, String targetRoot) {
+    String relativePath = file.absolutePath.replace originalRoot, ''
+    new File(targetRoot + relativePath)
+}
