@@ -25,8 +25,4 @@
     <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
         <property name="jobRepository" ref="jobRepository"/>
     </bean>
-
-    <bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
 </beans>
