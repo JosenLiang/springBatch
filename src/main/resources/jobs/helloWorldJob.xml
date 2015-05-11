@@ -7,4 +7,42 @@
                     http://www.springframework.org/schema/batch
                     http://www.springframework.org/schema/batch/spring-batch-2.1.xsd">
     <beans:import resource="../launch-context.xml"/>
+    <job id="helloWorldJob" incrementer="incrementer">
+        <step id="step1" next="decider">
+            <tasklet ref="messageTasklet"/>
+        </step>
+        <decision id="decider" decider="simpleDecider">
+            <next on="step2" to="step2"/>
+            <stop on="stop" restart="step2"/>
+        </decision>
+        <step id="step2">
+            <tasklet ref="successTasklet"/>
+        </step>
+        <validator ref="validator"/>
+    </job>
+
+    <beans:bean id="messageTasklet" class="com.thoughtworks.springBatch.MessageTasklet" scope="step">
+        <beans:property name="message" value="#{jobParameters[message]}"/>
+    </beans:bean>
+
+    <beans:bean id="successTasklet" class="com.thoughtworks.springBatch.MessageTasklet" scope="step">
+        <beans:property name="message" value="success"/>
+    </beans:bean>
+
+    <beans:bean id="failtasklet" class="com.thoughtworks.springBatch.MessageTasklet" scope="step">
+        <beans:property name="message" value="fail"/>
+    </beans:bean>
+
+    <beans:bean id="validator" class="org.springframework.batch.core.job.DefaultJobParametersValidator">
+        <beans:property name="requiredKeys" value="message"/>
+    </beans:bean>
+
+    <beans:bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+        <beans:property name="dataSource" ref="dataSource"/>
+    </beans:bean>
+
+    <beans:bean id="incrementer" class="org.springframework.batch.core.launch.support.RunIdIncrementer"/>
+
+    <beans:bean id="simpleDecider" class="com.thoughtworks.springBatch.SimpleJobExecutionDecider"/>
+
 </beans:beans>

@@ -8,7 +8,7 @@ apply plugin: 'application'
 mainClassName = 'org.springframework.batch.core.launch.support.CommandLineJobRunner'
 
 run {
-    args 'jobs/helloWorldJob.xml', 'helloWorldJob'
+    args 'jobs/helloWorldJob.xml', 'helloWorldJob', 'message=liang', '-next'
 }
 
 buildscript {
