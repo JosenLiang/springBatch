@@ -1,0 +1,4 @@
+1Michael        TSmith     123  4th Street     Chicago___
+2Warren         QGates     11   Wall Street    New York__
+3Ann            BDarrow    350  Fifth Avenue   New York__
+4Terrence       HDonnelly  4059 Mt. Lee Drive  Hollywood_
