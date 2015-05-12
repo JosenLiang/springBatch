@@ -8,7 +8,7 @@ apply plugin: 'application'
 mainClassName = 'org.springframework.batch.core.launch.support.CommandLineJobRunner'
 
 run {
-    args 'jobs/Demo2_FixedLengthFile.xml', 'demo'
+    args 'jobs/Demo3_XmlFile.xml', 'demo'
 }
 
 buildscript {
@@ -49,7 +49,8 @@ dependencies {
             'org.hibernate:hibernate-core:3.3.0.SP1',
             'org.hibernate:hibernate-entitymanager:3.3.2.GA',
             'org.hibernate:hibernate-annotations:3.4.0.GA',
-            'org.springframework:spring-orm:3.0.5.RELEASE'
+            'org.springframework:spring-orm:3.0.5.RELEASE',
+            'org.springframework:spring-oxm:3.0.5.RELEASE'
     )
     testCompile(
             'junit:junit:4.11',
