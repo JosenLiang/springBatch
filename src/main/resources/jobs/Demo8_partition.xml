@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                    http://www.springframework.org/schema/batch
+                    http://www.springframework.org/schema/batch/spring-batch-2.1.xsd">
+    <beans:import resource="../launch-context.xml"/>
+    <job id="demo">
+        <step id="masterStep">
+            <partition partitioner="partitioner" step="slaveStep"/>
+        </step>
+    </job>
+
+    <beans:bean id="partitioner" class="com.thoughtworks.springBatch.CustomerPartitioner"/>
+
+    <step id="slaveStep">
+        <tasklet>
+            <chunk reader="jdbcReader" writer="writer" commit-interval="1"/>
+        </tasklet>
+    </step>
+
+    <beans:bean id="jdbcReader" class="org.springframework.batch.item.database.JdbcCursorItemReader" scope="step">
+        <beans:property name="sql" value="SELECT * FROM CUSTOMER WHERE ID&gt;=? and ID&lt;=?"/>
+        <beans:property name="rowMapper" ref="customerRowMapper"/>
+        <beans:property name="dataSource" ref="dataSource"/>
+        <beans:property name="preparedStatementSetter" ref="preparedStatementSetter"/>
+    </beans:bean>
+
+    <beans:bean id="customerRowMapper" class="com.thoughtworks.springBatch.database.CustomerRowMapper"/>
+
+    <beans:bean id="preparedStatementSetter" class="org.springframework.jdbc.core.ArgPreparedStatementSetter"
+                scope="step">
+        <beans:constructor-arg index="0" value="#{stepExecutionContext[min]},#{stepExecutionContext[max]}"/>
+    </beans:bean>
+
+    <beans:bean id="writer" class="com.thoughtworks.springBatch.CommandLineItemWriter"/>
+</beans:beans>

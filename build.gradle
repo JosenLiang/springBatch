@@ -8,7 +8,7 @@ apply plugin: 'application'
 mainClassName = 'org.springframework.batch.core.launch.support.CommandLineJobRunner'
 
 run {
-    args 'jobs/Demo3_XmlFile.xml', 'demo'
+    args 'jobs/Demo8_partition.xml', 'demo'
 }
 
 buildscript {

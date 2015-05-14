@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                    http://www.springframework.org/schema/batch
+                    http://www.springframework.org/schema/batch/spring-batch-2.1.xsd">
+    <beans:import resource="../launch-context.xml"/>
+    <job id="breadShop">
+        <step id="step1" next="parallelProcessing">
+            <tasklet ref="placeOrderTasklet"/>
+        </step>
+        <split id="parallelProcessing" task-executor="taskExecutor" next="step4">
+            <flow>
+                <step id="step2">
+                    <tasklet ref="toastTasklet"/>
+                </step>
+            </flow>
+            <flow>
+                <step id="step3">
+                    <tasklet ref="prepareSaladCreamTasklet"/>
+                </step>
+            </flow>
+        </split>
+        <step id="step4">
+            <tasklet ref="deliveryTasklet"/>
+        </step>
+    </job>
+
+    <beans:bean id="taskExecutor" class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+
+    <beans:bean id="placeOrderTasklet" class="com.thoughtworks.springBatch.MessageTasklet">
+        <beans:property name="message" value="Place order"/>
+    </beans:bean>
+
+    <beans:bean id="toastTasklet" class="com.thoughtworks.springBatch.MessageTasklet">
+        <beans:property name="message" value="Toast Bread"/>
+    </beans:bean>
+
+    <beans:bean id="prepareSaladCreamTasklet" class="com.thoughtworks.springBatch.MessageTasklet">
+        <beans:property name="message" value="Prepare Salad Cream"/>
+    </beans:bean>
+
+    <beans:bean id="deliveryTasklet" class="com.thoughtworks.springBatch.MessageTasklet">
+        <beans:property name="message" value="Delivery Bread"/>
+    </beans:bean>
+</beans:beans>

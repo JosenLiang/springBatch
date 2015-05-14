@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                    http://www.springframework.org/schema/batch
+                    http://www.springframework.org/schema/batch/spring-batch-2.1.xsd">
+    <beans:import resource="../launch-context.xml"/>
+    <job id="demo">
+        <step id="step1">
+            <tasklet>
+                <chunk commit-interval="2" reader="customerReader" writer="writer"/>
+            </tasklet>
+        </step>
+    </job>
+
+    <beans:bean id="customerReader" class="com.thoughtworks.springBatch.CustomizedCustomerReader"/>
+
+    <beans:bean id="writer" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+        <beans:property name="dataSource" ref="dataSource"/>
+        <beans:property name="sql"
+                        value="INSERT INTO BACKUP_CUSTOMER(FIRST_NAME,MIDDLE_NAME,LAST_NAME,ADDRESS_NUMBER,STREET,CITY) VALUES(:firstName,:middleName,:lastName,:addressNumber,:street,:city)"/>
+        <beans:property name="itemSqlParameterSourceProvider" ref="itemSqlParameterSourceProvider"/>
+    </beans:bean>
+
+    <beans:bean id="itemSqlParameterSourceProvider"
+                class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
+</beans:beans>

@@ -3,11 +3,24 @@ package com.thoughtworks.springBatch.model;
 public class Customer {
     private int id;
     private String firstName;
-    private char middleName;
+    private String middleName;
     private String lastName;
     private String addressNumber;
     private String street;
     private String city;
+
+    public Customer() {
+    }
+
+    public Customer(int id, String firstName, String middleName, String lastName, String addressNumber, String street, String city) {
+        this.id = id;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.addressNumber = addressNumber;
+        this.street = street;
+        this.city = city;
+    }
 
     public int getId() {
         return id;
@@ -25,11 +38,11 @@ public class Customer {
         this.firstName = firstName;
     }
 
-    public char getMiddleName() {
+    public String getMiddleName() {
         return middleName;
     }
 
-    public void setMiddleName(char middleName) {
+    public void setMiddleName(String middleName) {
         this.middleName = middleName;
     }
 
@@ -63,5 +76,18 @@ public class Customer {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", middleName=" + middleName +
+                ", lastName='" + lastName + '\'' +
+                ", addressNumber='" + addressNumber + '\'' +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                '}';
     }
 }
